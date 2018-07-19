@@ -1,6 +1,8 @@
-# Go言語 + Python + gRPC で自然言語処理API 実装ハンズオン
+Qiita記事用のリポジトリ。更新中
 
-APIサーバーはGo言語で実装したいけど、統計処理などの役割は過去にPythonで作ったコードに処理させたいという想定でgRPCのハンズオン記事です。自然言語処理してくれるAPIを例にgRPCに触れていきます。
+# Vue.js + Go言語 + gRPC + Pay.jp でカード決済マイクロサービスを実装するハンズオン
+
+そろそろカード決済の実装経験しとくかと思い、Pay.jpを眺めたらかなりドキュメントが充実してたので使いやすかった。今後、カード決済するサービスを作るのを見越して決済サービスをgRPCでマイクロサービス化したので、ハンズオン形式で紹介します。
 
 ## そもそもRPCとは
 
@@ -14,7 +16,7 @@ HTTP/2を標準でサポートしたRPCフレームワークで、。 デフォ�
 
 下記のような形を目指していきます。
 
-## まずはGo言語でgRPCに触れる
+## まずはGo言語でに触れる
 
 ### gRPC開発環境を作る
 
@@ -51,26 +53,30 @@ $ protoc --version
 ```proto
 syntax = "proto3";
 
-package tasklistgateway;
+package paymentgateway;
 
-// Service - ここで定義したメソッドがGo言語で使える関数に変換されます
-service TaskManager {
-  rpc GetTask (GetTaskRequest) returns (Task) {}
+// For grpc gateway
+// import "google/api/annotations.proto";
+
+
+service PayManager {
+  rpc Charge (PayRequest) returns (PayResponse) {}
 }
 
-// response の型を定義しています
-message Task {
-  int32 id = 1;
-  string title = 2;
+message PayRequest {
+  string num = 1;
+  string cvc = 2;
+  string expm = 3;
+  string expy = 4;
 }
 
-// request の型を定義しています
-message GetTaskRequest {
-  int32 id = 1;
+message PayResponse {
+  bool paid = 1;
+  bool captured = 3;
+  int64 amount = 2;
 }
 ```
 
-簡単なrpcサービスを定義しました。これは Taskを返すメソッドで、idを使ってTaskを受け取れます
 ここまででGo言語のコードを生成する準備が整いました！早速下記を実行してみましょう
 
 ```
@@ -82,68 +88,36 @@ $ protoc --go_out=plugins=grpc:. proto/task_list.proto
 
 ```go
 // ...
-
-func (c *taskManagerClient) GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error) {
-	out := new(Task)
-	err := c.cc.Invoke(ctx, "/tasklistgateway.TaskManager/GetTask", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ...
 ```
 
-こいつを自分で作るコードの中に組み込んでいきます。このメソッドを使う際には
-下記のような実装になります。
+クライアント側は下記のような実装になります。
 
 ```go
-package main
-
-import (
-	"context"
-	"errors"
-	"log"
-	"net"
-
-	tlpb "grpc/proto"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-)
-
-const (
-	port = ":50051"
-)
-
-type server struct{}
-
-func (s *server) GetTask(ctx context.Context, req *tlpb.GetTaskRequest) (*tlpb.Task, error) {
-	log.Println("GetTask in gPRC server")
-	var task = &tlpb.Task{
-		Id:    1,
-		Title: "Hello gRPC server",
-	}
-	if req.Id == task.Id {
-		return task, nil
-	}
-	return nil, errors.New("Not find Task")
-}
-
 func main() {
-	lis, err := net.Listen("tcp", port)
+	//IPアドレス(ここではlocalhost)とポート番号(ここでは5000)を指定して、サーバーと接続する
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		fmt.Println(err)
 	}
-	s := grpc.NewServer()
-	tlpb.RegisterTaskManagerServer(s, &server{})
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-	log.Printf("gRPC Server started: localhost%s\n", port)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+
+	//接続は最後に必ず閉じる
+	defer conn.Close()
+
+	c := gpay.NewPayManagerClient(conn)
+
+	//サーバーに対してリクエストを送信する
+	req := &gpay.PayRequest{
+		Num:  "4242424242424242",
+		Cvc:  "123",
+		Expm: "2",
+		Expy: "2020",
 	}
+	resp, err := c.Charge(context.Background(), req)
+	if err != nil {
+		log.Fatalf("RPC error: %v", err)
+	}
+	log.Println(resp.Captured)
 }
 
 ```
