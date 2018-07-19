@@ -21,7 +21,7 @@ type server struct{}
 
 func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayResponse, error) {
 	// PAI の初期化
-	pay := payjp.New("sk_test_bfb67d3a18aca4e01e20c7ac", nil)
+	pay := payjp.New("<<テスト秘密鍵>>", nil)
 
 	// 支払いをします。第一引数に支払い金額、第二引数に支払いの方法や設定を入れます。
 	charge, err := pay.Charge.Create(int(req.Amount), payjp.Charge{

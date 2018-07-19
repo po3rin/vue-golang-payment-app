@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"vue-golang-payment-app/baskend-api/infrastructure"
 )
 
 func main() {
-	fmt.Println("in development ...")
+	infrastructure.Router.Run(os.Getenv("API_SERVER_PORT"))
 }
