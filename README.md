@@ -132,21 +132,16 @@ func (c *payManagerClient) Charge(ctx context.Context, in *PayRequest, opts ...g
 // ...
 ```
 
-このメソッドや構造体を使って、サーバー側のコードを書いていきます。
-基本このコードはいじりません。変更を加える時は.protoファイルを変更して、また先ほどの生成コマンドを叩けば更新されます。決済処理はまだ加えてません。単純に固定のレスポンスを返す用になっています。
+基本、上のコードはいじりません。変更を加える時は.protoファイルを変更して、また先ほどの生成コマンドを叩けば更新されます。このメソッドや構造体を使って、サーバー側のコードを書いていきます。決済処理はまだ加えてません。単純に固定のレスポンスを返す用になっています。
 
 ```go
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"net"
+	// ...
 
 	gpay "grpc/proto"
 
-	"github.com/payjp/payjp-go/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -189,10 +184,9 @@ func main() {
 package main
 
 import (
-	"fmt"
+	//...
 
 	gpay "grpc/proto"
-	"log"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -243,9 +237,9 @@ $ go run client/client.go
 2018/07/19 20:46:06 true
 ```
 
-これでgRPCで会話ができました。
+これでgRPCでやり取りができました。
 
-### Pay.jp で決済機能をサクッと実装
+## Pay.jp で決済機能をサクッと実装
 
 早速Pay.jpを使いましょう。まずは下記からアカウントを登録します。
 https://pay.jp/
@@ -309,3 +303,5 @@ true が返ってきたら成功です。
 Pay.jpの管理画面に行って支払いが本当に行われているか確認しましょう！
 
 え、こんだけ？とビビるくらい簡単に支払いができました。
+
+### Vue.js でクライアントを実装しよう
