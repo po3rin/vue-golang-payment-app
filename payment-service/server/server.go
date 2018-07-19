@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
 
 	gpay "vue-golang-payment-app/payment-service/proto"
 
@@ -21,7 +22,7 @@ type server struct{}
 
 func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayResponse, error) {
 	// PAI の初期化
-	pay := payjp.New("<<テスト秘密鍵>>", nil)
+	pay := payjp.New(os.Getenv("PAYJP_TEST_SECRET_KEY"), nil)
 
 	// 支払いをします。第一引数に支払い金額、第二引数に支払いの方法や設定を入れます。
 	charge, err := pay.Charge.Create(int(req.Amount), payjp.Charge{
