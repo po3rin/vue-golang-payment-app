@@ -62,10 +62,11 @@ service PayManager {
 
 // カード決済に使うパラメーターをリクエストに定義
 message PayRequest {
-  string num = 1;
-  string cvc = 2;
-  string expm = 3;
-  string expy = 4;
+  int64 amount = 1;
+  string num = 2;
+  string cvc = 3;
+  string expm = 4;
+  string expy = 5;
 }
 
 // カード決済後のレスポンスを定義
@@ -83,12 +84,12 @@ service宣言でサービスを定義し、定義したmessageを引数や返り
 
 ここまででGo言語のコードを生成する準備が整いました！早速下記を実行してみましょう
 
-```
+```bash
 $ protoc --go_out=plugins=grpc:. proto/task_list.proto
 ```
 
-これでGo言語で書かれたソースコードが proto /に出来ています。中身を確認してみましょう
-下記のメソッドが確認できるはずです。
+これでGo言語で書かれたソースコード proto/pay.pd.go が出来ています。中身を確認してみましょう
+下記の構造体やメソッドが確認できるはずです。
 
 ```go
 // ... 省略
@@ -131,8 +132,8 @@ func (c *payManagerClient) Charge(ctx context.Context, in *PayRequest, opts ...g
 // ...
 ```
 
-自動生成できました。基本このコードはいじりません。変更を加える時は.protoファイルを変更して、また先ほどの生成コマンドを叩けば更新されます。
-このメソッドや構造体を使って、サーバー側のコードを書いていきます。決済処理はまだ加えません。単純に固定のレスポンスを返します。
+このメソッドや構造体を使って、サーバー側のコードを書いていきます。
+基本このコードはいじりません。変更を加える時は.protoファイルを変更して、また先ほどの生成コマンドを叩けば更新されます。決済処理はまだ加えてません。単純に固定のレスポンスを返す用になっています。
 
 ```go
 package main
@@ -214,6 +215,7 @@ func main() {
 
 	//サーバーに対してリクエストを送信する
 	req := &gpay.PayRequest{
+		Amount: 3800,
 		Num:  "4242424242424242",
 		Cvc:  "123",
 		Expm: "2",
@@ -240,6 +242,8 @@ $ go run server/server.go
 $ go run client/client.go
 2018/07/19 20:46:06 true
 ```
+
+これでgRPCで会話ができました。
 
 ### Pay.jp で決済機能をサクッと実装
 
