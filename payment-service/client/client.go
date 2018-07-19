@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	gpay "grpc/proto"
 	"log"
+	gpay "vue-golang-payment-app/payment-service/proto"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

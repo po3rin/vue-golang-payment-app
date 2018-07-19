@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	gpay "grpc/proto"
+	gpay "vue-golang-payment-app/payment-service/proto"
 
 	payjp "github.com/payjp/payjp-go/v1"
 	"google.golang.org/grpc"
