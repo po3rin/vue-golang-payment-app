@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package paymentgateway;
+package paymentservice;
 
 // For grpc gateway
 // import "google/api/annotations.proto";
@@ -11,10 +11,11 @@ service PayManager {
 }
 
 message PayRequest {
-  string num = 1;
-  string cvc = 2;
-  string expm = 3;
-  string expy = 4;
+  int64 amount = 1;
+  string num = 2;
+  string cvc = 3;
+  string expm = 4;
+  string expy = 5;
 }
 
 message PayResponse {

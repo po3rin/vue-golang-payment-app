@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 
 	gpay "grpc/proto"
 
-	"github.com/payjp/payjp-go/v1"
+	payjp "github.com/payjp/payjp-go/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -21,9 +20,11 @@ const (
 type server struct{}
 
 func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayResponse, error) {
+	// PAI の初期化
 	pay := payjp.New("sk_test_bfb67d3a18aca4e01e20c7ac", nil)
-	// 支払いをします
-	charge, _ := pay.Charge.Create(3500, payjp.Charge{
+
+	// 支払いをします。第一引数に支払い金額、第二引数に支払いの方法や設定を入れます。
+	charge, err := pay.Charge.Create(int(req.Amount), payjp.Charge{
 		// 現在はjpyのみサポート
 		Currency: "jpy",
 		// カード情報、顧客ID、カードトークンのいずれかを指定
@@ -41,8 +42,11 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 			"ISBN": "1449312063",
 		},
 	})
-	fmt.Println("Amount:", charge.Amount)
-	fmt.Println("Paid:", charge.Paid)
+	if err != nil {
+		return nil, err
+	}
+
+	// 支払った結果から、Response生成
 	res := &gpay.PayResponse{
 		Paid:     charge.Paid,
 		Captured: charge.Captured,
