@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package paymentgateway;
+
+// For grpc gateway
+// import "google/api/annotations.proto";
+
+
+service PayManager {
+  rpc Charge (PayRequest) returns (PayResponse) {}
+}
+
+message PayRequest {
+  string num = 1;
+  string cvc = 2;
+  string expm = 3;
+  string expy = 4;
+}
+
+message PayResponse {
+  bool paid = 1;
+  bool captured = 3;
+  int64 amount = 2;
+}
