@@ -32,11 +32,11 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 		CardToken: req.Token,
 		Capture:   true,
 		// 概要のテキストを設定できます
-		Description: "Book: 'The Art of Community'",
+		Description: req.Name + ":" + req.Discription,
 		// 追加のメタデータを20件まで設定できます
-		Metadata: map[string]string{
-			"ISBN": "1449312063",
-		},
+		// Metadata: map[string]string{
+		// 	"ISBN": "1449312063",
+		// },
 	})
 	if err != nil {
 		return nil, err

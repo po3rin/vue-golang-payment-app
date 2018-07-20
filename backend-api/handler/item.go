@@ -2,34 +2,31 @@ package handler
 
 import (
 	"net/http"
-	"vue-golang-payment-app/backend-api/domain"
+	"strconv"
+	"vue-golang-payment-app/backend-api/db"
 )
-
-// GetItem - get item by id
-func GetItem(c Context) {
-	resp := &domain.Item{
-		Name:        "testItem",
-		Discription: "this is a test item",
-		Amount:      1200,
-	}
-	c.JSON(http.StatusOK, resp)
-}
 
 // GetLists - get all items
 func GetLists(c Context) {
-	resp1 := &domain.Item{
-		Name:        "testItem",
-		Discription: "this is a test item",
-		Amount:      1200,
+	res, err := db.SelectAllItems()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
 	}
-	resp2 := &domain.Item{
-		Name:        "testToy",
-		Discription: "this is a test toy",
-		Amount:      1500,
+	c.JSON(http.StatusOK, res)
+}
+
+// GetItem - get item by id
+func GetItem(c Context) {
+	identifer, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
 	}
-	lists := domain.Items{
-		resp1,
-		resp2,
+	res, err := db.SelectItem(int64(identifer))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
 	}
-	c.JSON(http.StatusOK, lists)
+	c.JSON(http.StatusOK, res)
 }
