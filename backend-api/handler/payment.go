@@ -1,10 +1,10 @@
-package main
+package handler
 
 import (
 	"context"
 	"fmt"
+	"net/http"
 
-	"log"
 	gpay "vue-golang-payment-app/payment-service/proto"
 
 	"google.golang.org/grpc"
@@ -12,30 +12,25 @@ import (
 
 var addr = "localhost:50051"
 
-func main() {
+// Charge exec payment-service charge
+func Charge(c Context) {
 	//IPアドレス(ここではlocalhost)とポート番号(ここでは5000)を指定して、サーバーと接続する
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	//接続は最後に必ず閉じる
 	defer conn.Close()
-
-	c := gpay.NewPayManagerClient(conn)
+	client := gpay.NewPayManagerClient(conn)
 
 	//サーバーに対してリクエストを送信する
 	req := &gpay.PayRequest{
 		Amount: 5000,
-		Num:    "4242424242424242",
-		Cvc:    "123",
-		Expm:   "2",
-		Expy:   "2020",
+		Token:  "dsdsdsdsd",
 	}
-	resp, err := c.Charge(context.Background(), req)
+	resp, err := client.Charge(context.Background(), req)
 	if err != nil {
-		log.Fatalf("RPC error: %v", err)
+		c.JSON(http.StatusForbidden, err)
+		return
 	}
-	log.Println(resp.Captured)
+	c.JSON(http.StatusOK, resp)
 }

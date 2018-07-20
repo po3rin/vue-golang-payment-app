@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"vue-golang-payment-app/baskend-api/infrastructure"
+	"vue-golang-payment-app/backend-api/infrastructure"
 )
 
 func main() {

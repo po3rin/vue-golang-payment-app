@@ -29,7 +29,7 @@ $ go get -u github.com/golang/protobuf/protoc-gen-go
 ちなみにbinにパスが通っているか確認。これがないとコード自動生成時にエラーが出ます。
 
 ```
-export PATH=$PATH:$GOPATH/bn
+export PATH=$PATH:$GOPATH/bin
 ```
 
 そして RPC するコードを生成する protoc コンパイラーをインストールします。下記で自分のOS等に合うものをダウンロードして展開します

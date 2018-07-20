@@ -29,13 +29,8 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 		// 現在はjpyのみサポート
 		Currency: "jpy",
 		// カード情報、顧客ID、カードトークンのいずれかを指定
-		Card: payjp.Card{
-			Number:   req.Num,
-			CVC:      req.Cvc,
-			ExpMonth: req.Expm,
-			ExpYear:  req.Expy,
-		},
-		Capture: true,
+		CardToken: req.Token,
+		Capture:   true,
 		// 概要のテキストを設定できます
 		Description: "Book: 'The Art of Community'",
 		// 追加のメタデータを20件まで設定できます

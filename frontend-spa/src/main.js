@@ -3,9 +3,11 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import PayjpCheckout from 'vue-payjp-checkout'
 
 Vue.config.productionTip = false
 
+Vue.use(PayjpCheckout)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

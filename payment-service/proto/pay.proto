@@ -12,10 +12,7 @@ service PayManager {
 
 message PayRequest {
   int64 amount = 1;
-  string num = 2;
-  string cvc = 3;
-  string expm = 4;
-  string expy = 5;
+  string token = 2;
 }
 
 message PayResponse {
