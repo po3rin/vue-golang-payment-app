@@ -33,10 +33,6 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 		Capture:   true,
 		// 概要のテキストを設定できます
 		Description: req.Name + ":" + req.Discription,
-		// 追加のメタデータを20件まで設定できます
-		// Metadata: map[string]string{
-		// 	"ISBN": "1449312063",
-		// },
 	})
 	if err != nil {
 		return nil, err
@@ -58,6 +54,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	gpay.RegisterPayManagerServer(s, &server{})
+
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	log.Printf("gRPC Server started: localhost%s\n", port)

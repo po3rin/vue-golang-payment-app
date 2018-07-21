@@ -27,11 +27,11 @@ func main() {
 
 	//サーバーに対してリクエストを送信する
 	req := &gpay.PayRequest{
-		Amount: 5000,
-		Num:    "4242424242424242",
-		Cvc:    "123",
-		Expm:   "2",
-		Expy:   "2020",
+		Id:          1,
+		Token:       "token",
+		Amount:      3000,
+		Name:        "toy",
+		Discription: "this is test toy",
 	}
 	resp, err := c.Charge(context.Background(), req)
 	if err != nil {

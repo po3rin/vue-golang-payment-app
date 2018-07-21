@@ -13,12 +13,12 @@ var Conn *sql.DB
 // NewSQLHandler - init sql handler
 func init() {
 	user := os.Getenv("MYSQL_USER")
-	host := os.Getenv("MYSQL_HOST")
+	// host := os.Getenv("MYSQL_HOST")
 	pass := os.Getenv("MYSQL_PASSWORD")
 	name := os.Getenv("MYSQL_DATABASE")
-	port := os.Getenv("MYSQL_PORT")
+	// port := os.Getenv("MYSQL_PORT")
 
-	dbconf := user + ":" + pass + "@tcp(" + host + ":" + port + ")/" + name
+	dbconf := user + ":" + pass + "@/" + name
 	conn, err := sql.Open("mysql", dbconf)
 	if err != nil {
 		panic(err.Error)

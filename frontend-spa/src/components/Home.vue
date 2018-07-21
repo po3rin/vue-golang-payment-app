@@ -1,7 +1,7 @@
 <template>
 <div class="hello">
   <ul>
-    <li v-for="item in items" :key="item.id" @click="pageto(item.id)">
+    <li v-for="item in items" :key="item.ID" @click="pageto(item.ID)">
       <item-card :item="item"></item-card>
     </li>
   </ul>

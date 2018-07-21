@@ -2,7 +2,7 @@
   <div class="itemcard">
     <h1>{{ item.Name }}</h1>
     <h2>{{ item.Description }}</h2>
-    <h2>{{ item.Amount }}</h2>
+    <h2>{{ item.Amount }}円</h2>
   </div>
 </template>
 

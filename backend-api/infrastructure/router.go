@@ -16,8 +16,8 @@ func init() {
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{os.Getenv("CLIENT_CORS_ADDR")},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders: []string{"Origin"},
+		AllowMethods: []string{"GET", "POST"},
+		AllowHeaders: []string{"Origin", "Content-Type"},
 	}))
 
 	// router.POST("/api/v1/items", func(c *gin.Context) {})
