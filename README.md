@@ -3,7 +3,10 @@
 これは Qiita にも掲載されています。
 https://qiita.com/po3rin/items/9638eab0a6a70faca86e
 
-そろそろカード決済の実装経験しとくかと思い、PAY.JPを眺めたらかなりドキュメントが充実してたので使いやすかった。今後、カード決済するサービスを作るのを見越して決済サービスをgRPCでマイクロサービス化してみた。そのまま Vue.js と Go言語を使い、カード決済できるWEBサービスのモックを試しに作ってみた。その実装を簡略化してハンズオン形式で紹介します。
+そろそろカード決済の実装経験しとくかと思い、PAY.JPを眺めたらかなりドキュメントが充実してたので使いやすかった。今後、カード決済するサービスを作るのを見越して決済サービスをgRPCでマイクロサービス化してみた。そのまま Vue.js と Go言語を使い、カード決済できるWEBサービスのサンプルを試しに作ってみた。その実装を簡略化してハンズオン形式で紹介します。
+
+全コードは GitHub にあげてます。
+https://github.com/po3rin/vue-golang-payment-app
 
 ## 得られるもの
 
@@ -15,13 +18,13 @@ https://qiita.com/po3rin/items/9638eab0a6a70faca86e
 
 フロントエンドは Vue.js。サーバーサイドは Go言語で実装します。それ以外で今回使う技術は下記！
 
-## PAY.JP
+### PAY.JP
 
 ![pay.png](https://qiita-image-store.s3.amazonaws.com/0/186028/68b5acb8-3eb6-3f1b-31b0-1e7ccc320387.png)
 
 支払い機能をシンプルなAPIで実装できる！分かりやすい料金形態で決済を導入することが可能です。日本の企業が作ったサービスなので日本語の情報が豊富です。Go言語で実装する方法があまりまとまってないので、今回はそこもお話しします。
 
-## gRPC
+### gRPC
 ![grpc-p.png](https://qiita-image-store.s3.amazonaws.com/0/186028/921bbdc2-a113-bf8d-7792-1dd68f82724a.png)
 
 そもそもRPCとは、RPC (Remote Procedure Call と呼ばれる、別のアドレス空間にあるサブルーチンや手続きを実行することを可能にする技術)を実現するためにGoogleが開発したプロトコルです。さらっと出てきたが Protocol Buffer は構造化データをバイト列に変換(シリアライズ)する技術で、RPC でデータをやり取りする際などに用いられる。Protocol Buffer自体は新しい技術ではなく、2008年からオープンソース化している。
@@ -32,7 +35,12 @@ https://qiita.com/po3rin/items/9638eab0a6a70faca86e
 
 ![pay-go-vue.png](https://qiita-image-store.s3.amazonaws.com/0/186028/9df053de-d9e6-0317-12ba-2beade53e587.png)
 
-上記のような形を目指していきます。payment-service と item-service 間は gRPC で通信します。本当は商品情報を扱う処理もマイクロサービス化したかったのですが、ハンズオンとしては複雑になりそうなのでやめました。ちなみにPAY.JPでは直でカード情報をサーバーに渡して処理する形も昔はできましたが、現在は推奨されていません。
+上記のような形を目指していきます。payment-service と item-service 間は gRPC で通信します。本当は商品情報を扱う処理もマイクロサービス化したかったのですが、ハンズオンとしては複雑になりそうなのでやめました。
+
+データベースはMySQLを使います。ここに商品情報を格納し、フロントエンドに返したりします。
+
+ちなみにPAY.JPでは直でカード情報をサーバーに渡して処理する形も昔はできましたが、現在は推奨されていません。クレジットカード情報をいかに所持せずに決済処理を提供するかが必要になっています。
+
 
 ディレクトリ構造は下記のようにしました。
 
@@ -51,8 +59,7 @@ https://qiita.com/po3rin/items/9638eab0a6a70faca86e
 
 
 まずは上記の形をめざします。
-payment-service というディレクトリにPAY.JPのAPIを叩いて実際に支払いをするマイクロサービスをつくります。
-手順としては3ステップです。
+payment-service というディレクトリにPAY.JPのAPIを叩いて実際に支払いをするマイクロサービスをつくります。手順としては3ステップです。
 
 ![grpc3.png](https://qiita-image-store.s3.amazonaws.com/0/186028/ae79f294-323c-bce0-8e0d-714be3539846.png)
 
@@ -108,7 +115,7 @@ message PayRequest {
   string token = 2;
   int64 amount = 3;
   string name = 4;
-  string discription =　5;
+  string description =　5;
 }
 
 // カード決済後のレスポンスを定義
@@ -132,7 +139,7 @@ $ protoc --go_out=plugins=grpc:. proto/task_list.proto
 ```
 
 これでGo言語で書かれたソースコード proto/pay.pd.go が出来ています。中身を確認してみましょう
-下記の構造体やメソッドが確認できるはずです。
+下記の構造体や interface が確認できるはずです。
 
 ```go
 // ... 省略
@@ -143,7 +150,7 @@ type PayRequest struct {
 	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
 	Amount               int64    `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
 	Name                 string   `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Discription          string   `protobuf:"bytes,5,opt,name=discription,proto3" json:"discription,omitempty"`
+	Description          string   `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	// ...
 }
 
@@ -159,16 +166,10 @@ type PayResponse struct {
 
 // ... 省略
 
-// 先ほど定義したserviceから生成されたメソッド
-func (c *payManagerClient) Charge(ctx context.Context, in *PayRequest, opts ...grpc.CallOption) (*PayResponse, error) {
-	out := new(PayResponse)
-	err := c.cc.Invoke(ctx, "/paymentservice.PayManager/Charge", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+// 先ほど定義したserviceから生成された interface
+type PayManagerServer interface {
+	Charge(context.Context, *PayRequest) (*PayResponse, error)
 }
-// ...
 ```
 
 基本、上のコードはいじりません。変更を加える時は.protoファイルを変更して、また先ほどの生成コマンドを叩けば更新されます。このinterfaceやstructを使って、サーバー側のコードを書いていきます。
@@ -177,7 +178,7 @@ func (c *payManagerClient) Charge(ctx context.Context, in *PayRequest, opts ...g
 
 先ほど生成された interface を満たすようにコード書いていきます。payment-service/server/server.go を作成します。
 
-そしてついにここで PAY.JP がでてきます。PAY.JP　の　API を叩くクライアントのコードを実装しても良いですが、今回は https://github.com/payjp/payjp-go を使います。これは PAY.JP のAPI　とのやりとりを抽象化してくれているパッケージです。詳しいドキュメントはありませんが、コードに日本語でコメントがついているので、使い方も簡単に理解できます。
+そしてついにここで PAY.JP がでてきます。PAY.JPの API を叩くクライアントのコードを実装しても良いですが、今回は https://github.com/payjp/payjp-go を使います。これは PAY.JP のAPI とのやりとりを抽象化してくれているパッケージです。詳しいドキュメントはありませんが、パッケージのGo言語のコードに日本語でコメントがついているので、使い方も簡単に理解できます。
 下記はgRPCで商品情報とカードのToken情報を受け取って、実際に支払いを行います。
 
 ```go
@@ -212,7 +213,7 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 		CardToken: req.Token,
 		Capture:   true,
 		// 概要のテキストを設定できます
-		Description: req.Name + ":" + req.Discription,
+		Description: req.Name + ":" + req.Description,
 	})
 	if err != nil {
 		return nil, err
@@ -281,7 +282,7 @@ POST   /api/v1/charge/items/:id  --> id で指定された商品を購入する 
 ├── domai--------------(entity層)
 │   ├── item.go
 │   └── token.go
-├── handler-------------(いわゆるコントローラ)
+├── handler-------------(handler)
 │   ├── contecxt.go
 │   ├── item.go
 │   └── payment.go
@@ -305,7 +306,7 @@ package domain
 type Item struct {
 	ID          int64
 	Name        string
-	Discription string
+	Description string
 	Amount      int64
 }
 
@@ -387,15 +388,15 @@ func SelectAllItems() (items domain.Items, err error) {
 	for stmt.Next() {
 		var id int64
 		var name string
-		var discription string
+		var description string
 		var amount int64
-		if err := stmt.Scan(&id, &name, &discription, &amount); err != nil {
+		if err := stmt.Scan(&id, &name, &description, &amount); err != nil {
 			continue
 		}
 		item := domain.Item{
 			ID:          id,
 			Name:        name,
-			Discription: discription,
+			Description: description,
 			Amount:      amount,
 		}
 		items = append(items, item)
@@ -413,15 +414,15 @@ func SelectItem(identifier int64) (item domain.Item, err error) {
 	defer stmt.Close()
 	var id int64
 	var name string
-	var discription string
+	var description string
 	var amount int64
-	err = stmt.QueryRow(identifier).Scan(&id, &name, &discription, &amount)
+	err = stmt.QueryRow(identifier).Scan(&id, &name, &description, &amount)
 	if err != nil {
 		return
 	}
 	item.ID = id
 	item.Name = name
-	item.Discription = discription
+	item.Description = description
 	item.Amount = amount
 	return
 }
@@ -441,7 +442,8 @@ Go言語の面白い点で、戻り値に名前をつけて定義した関数は
 package main
 
 import (
-	"os"
+	// ...
+
 	"vue-golang-payment-app/backend-api/infrastructure"
 )
 
@@ -494,7 +496,8 @@ func init() {
 }
 ```
 
-環境変数 CLIENT_CORS_ADDR も忘れずに！僕は http://localhost:8080 に設定してます(あとでVue.jsをlocalhost:8080で立ち上げるため)
+環境変数 CLIENT_CORS_ADDR も忘れずに！僕は http://localhost:8080 に設定してます(あとで Vue.js を localhost:8080 で立ち上げるため)
+
 これでmain.goで呼ばれていたRouterの設定が終わりました。続いて、APIへのリクエストがあった際の実際の処理を handler パッケージに書きましょう。
 
 ### handler 部分
@@ -520,8 +523,8 @@ type Context interface {
 package handler
 
 import (
-	"net/http"
-	"strconv"
+	// ...
+
 	"vue-golang-payment-app/backend-api/db"
 )
 
@@ -590,7 +593,7 @@ func Charge(c Context) {
 		Token:       t.Token,
 		Amount:      res.Amount,
 		Name:        res.Name,
-		Discription: res.Discription,
+		Description: res.Description,
 	}
 
 	//IPアドレス(ここではlocalhost)とポート番号(ここでは50051)を指定して、サーバーと接続する
@@ -631,16 +634,16 @@ DROP TABLE IF EXISTS items;
 CREATE TABLE items (
   id integer AUTO_INCREMENT,
   name varchar(255),
-  discription varchar(255),
+  description varchar(255),
   amount integer,
   primary key(id)
 );
 
-INSERT INTO items (name, discription, amount)
+INSERT INTO items (name, description, amount)
 VALUES
   ('toy', 'test-toy', 2000);
 
-INSERT INTO items (name, discription, amount)
+INSERT INTO items (name, description, amount)
 VALUES
   ('game', 'test-game', 6000);
 ```
@@ -655,10 +658,10 @@ mysql -p -u root itemsDB < init/init.sql
 
 ```bash
 curl -X GET localhost:8888/api/v1/items/1 
-{"ID":1,"Name":"toy","Discription":"test-toy","Amount":2000}
+{"ID":1,"Name":"toy","Description":"test-toy","Amount":2000}
 
 curl -X GET localhost:8888/api/v1/items
-[{"ID":1,"Name":"toy","Discription":"test-toy","Amount":2000},{"ID":2,"Name":"game","Discription":"test-game","Amount":6000}]
+[{"ID":1,"Name":"toy","Description":"test-toy","Amount":2000},{"ID":2,"Name":"game","Description":"test-game","Amount":6000}]
 
 curl -X POST localhost:8888/api/v1/charge/items/1 
 {"code":2,"message":"Charge.Create() parameter error: One of the following parameters is required: CustomerID, CardToken, Card"}
@@ -703,10 +706,10 @@ ItemCard.vue は Home.vue で使う商品を表示するコンポーネントで
 画面はひどく殺風景ですが下のようになります。
 
 HOME画面(商品リスト表示)
-<img width="517" alt="スクリーンショット 2018-07-22 17.53.49.png" src="https://qiita-image-store.s3.amazonaws.com/0/186028/5c995257-5c0d-10e4-6681-37b29f4934f3.png">
+<img width="444" alt="スクリーンショット 2018-07-23 02.02.14.png" src="https://qiita-image-store.s3.amazonaws.com/0/186028/91be52e0-118c-6e9b-ef59-9e5fc72bb343.png">
 
 商品詳細画面(商品リスト表示)
-<img width="495" alt="スクリーンショット 2018-07-22 17.53.57.png" src="https://qiita-image-store.s3.amazonaws.com/0/186028/477dc24e-fcfc-f31f-f5e4-9191906c2d04.png">
+<img width="425" alt="スクリーンショット 2018-07-23 02.02.21.png" src="https://qiita-image-store.s3.amazonaws.com/0/186028/7b00f25e-9f50-c71b-6997-2f957d6ed4d4.png">
 
 一旦サーバーとのやりとりに必要な axios モジュールを加えます。axios は Promise ベースの HTTPクライアントです。
 
@@ -714,14 +717,18 @@ HOME画面(商品リスト表示)
 $ npm install axios --save
 ```
 
-また、今回 PAY.JP で カード情報を Token化するために https://github.com/ngs/vue-payjp-checkou を使います。
-これは PAY.JP のカード情報入力コンポーネントを Vue.js で使えるようにしたものです。こちらもいれておきます。
+また、今回 PAY.JP で カード情報を Token化するために https://github.com/ngs/vue-payjp-checkout を使います。
+これは PAY.JP のカード情報入力コンポーネントを Vue.js で使えるようにしたものです。このような画面がひらくようになります。
+
+<img width="783" alt="スクリーンショット 2018-07-22 16.43.02.png" src="https://qiita-image-store.s3.amazonaws.com/0/186028/c1606836-770a-541b-87e5-b2387df13632.png">
+
+上のPAY.JPのクレジットカード入力フォームを使うと、開発者はクレジットカード番号に触れることなく決済機能が提供できるようになります。クレジットカード番号は盗み取られたりすると大きなリスクになります。そのため、今回はこの入力フォームを使いましょう。
 
 ```bash
 $ npm install --save vue-payjp-checkout
 ```
 
-これを Vue.js で使えるように src/main.js に一行追加します。
+vue-payjp-checkout　を Vue.js で使えるように src/main.js に一行追加します。
 
 ```js
 // 省略...
@@ -919,6 +926,7 @@ export default {
 ```
 
 << PAY.JPの管理画面にある公開テストKey >> に　PAY.JP　の公開テストキーをいれるのを忘れずに！　管理画面から手に入ります。
+
 ここでのポイントは beforeDestroy() で実行される window.PayjpCheckout = null です。
 これがないとページを移動したりするとカード登録ボタンが消えてしまいます。これは payjp-checkout のコンポネーネントがHTMLドキュメントの読み込みを起点として決済フォームを構築するためです。 そこでインスタンスが破棄される前に呼ばれる beforeDestroy() のライフサイクルで window.PayjpCheckout を一回空にして次のページ移動でもう一度コンポーネントを構築するようにしています。
 
@@ -966,6 +974,8 @@ $ npm run dev
 
 ## まとめ
 
-これで Vue.js + Go言語 + PAY.JP でカード決済できるWEBアプリケーションができました。めちゃくちゃ長くなりました。あとはUI整えたり商品管理画面つくったりでプロダクトに近づけていけば良さそうです。
+これで Vue.js + Go言語 + PAY.JP でカード決済できるWEBアプリケーションができました。めちゃくちゃ長くなりました。あとはUI整えたり商品管理画面つくったりでプロダクトに近づけていけば良さそうです。もしミスがあったらご指摘お願いします!!
 
+全コードは GitHub にあげてます。
+https://github.com/po3rin/vue-golang-payment-app
 

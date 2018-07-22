@@ -31,7 +31,7 @@ func main() {
 		Token:       "token",
 		Amount:      3000,
 		Name:        "toy",
-		Discription: "this is test toy",
+		Description: "this is test toy",
 	}
 	resp, err := c.Charge(context.Background(), req)
 	if err != nil {

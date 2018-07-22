@@ -15,7 +15,7 @@ message PayRequest {
   string token = 2;
   int64 amount = 3;
   string name = 4;
-  string discription =5;
+  string description =5;
 }
 
 message PayResponse {

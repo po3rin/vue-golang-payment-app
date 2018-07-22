@@ -32,7 +32,7 @@ func (s *server) Charge(ctx context.Context, req *gpay.PayRequest) (*gpay.PayRes
 		CardToken: req.Token,
 		Capture:   true,
 		// 概要のテキストを設定できます
-		Description: req.Name + ":" + req.Discription,
+		Description: req.Name + ":" + req.Description,
 	})
 	if err != nil {
 		return nil, err

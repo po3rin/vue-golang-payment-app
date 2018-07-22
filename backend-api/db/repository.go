@@ -16,15 +16,15 @@ func SelectAllItems() (items domain.Items, err error) {
 	for stmt.Next() {
 		var id int64
 		var name string
-		var discription string
+		var desctiption string
 		var amount int64
-		if err := stmt.Scan(&id, &name, &discription, &amount); err != nil {
+		if err := stmt.Scan(&id, &name, &desctiption, &amount); err != nil {
 			continue
 		}
 		item := domain.Item{
 			ID:          id,
 			Name:        name,
-			Discription: discription,
+			Description: desctiption,
 			Amount:      amount,
 		}
 		items = append(items, item)
@@ -42,15 +42,15 @@ func SelectItem(identifier int64) (item domain.Item, err error) {
 	defer stmt.Close()
 	var id int64
 	var name string
-	var discription string
+	var desctiption string
 	var amount int64
-	err = stmt.QueryRow(identifier).Scan(&id, &name, &discription, &amount)
+	err = stmt.QueryRow(identifier).Scan(&id, &name, &desctiption, &amount)
 	if err != nil {
 		return
 	}
 	item.ID = id
 	item.Name = name
-	item.Discription = discription
+	item.Description = desctiption
 	item.Amount = amount
 	return
 }

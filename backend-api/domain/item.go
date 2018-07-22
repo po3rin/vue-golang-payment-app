@@ -4,7 +4,7 @@ package domain
 type Item struct {
 	ID          int64
 	Name        string
-	Discription string
+	Description string
 	Amount      int64
 }
 

@@ -34,7 +34,7 @@ func Charge(c Context) {
 		Token:       t.Token,
 		Amount:      res.Amount,
 		Name:        res.Name,
-		Discription: res.Discription,
+		Description: res.Description,
 	}
 
 	//IPアドレス(ここではlocalhost)とポート番号(ここでは5000)を指定して、サーバーと接続する
