@@ -27,9 +27,11 @@ https://github.com/po3rin/vue-golang-payment-app
 ### gRPC
 ![grpc-p.png](https://qiita-image-store.s3.amazonaws.com/0/186028/921bbdc2-a113-bf8d-7792-1dd68f82724a.png)
 
-そもそもRPCとは、RPC (Remote Procedure Call と呼ばれる、別のアドレス空間にあるサブルーチンや手続きを実行することを可能にする技術)を実現するためにGoogleが開発したプロトコルです。さらっと出てきたが Protocol Buffer は構造化データをバイト列に変換(シリアライズ)する技術で、RPC でデータをやり取りする際などに用いられる。Protocol Buffer自体は新しい技術ではなく、2008年からオープンソース化している。
+そもそもRPCとは、Remote Procedure Call と呼ばれる、別のアドレス空間にあるサブルーチンや手続きを実行することを可能にする技術です。
 
 そして gRPC はHTTP/2を標準でサポートしたRPCフレームワークです。ProtocolBufferをgRPC用に書いた上で、サポートしている言語(Go Python Ruby Javaなど)にコード書き出しを行うと、異なる言語間でも型保証された通信を行うことができます。出来たのは最近で2015年にGoogleが発表した様子。
+
+今回はgRPCを使って決済機能をマイクロサービス化します。これによってAPIサーバーへの影響を下げれる且つ、例えば今回の目指す形(下記に記載)であれば、APIサーバーをRubyで書き換えたいとなっても、RubyからGo言語の処理を叩けるので影響範囲を抑えれます。
 
 ## 今回目指す形
 
@@ -873,7 +875,6 @@ export default {
 
     <payjp-checkout
       api-key="<< PAY.JPの管理画面にある公開テストKey >>"
-      client-id="d3d774f50bb006c26bac19402f0140a7228f8522"
       text="カードを情報を入力して購入"
       submit-text="購入確定"
       name-placeholder="田中 太郎"
@@ -927,8 +928,11 @@ export default {
 
 << PAY.JPの管理画面にある公開テストKey >> に　PAY.JP　の公開テストキーをいれるのを忘れずに！　管理画面から手に入ります。
 
-ここでのポイントは beforeDestroy() で実行される window.PayjpCheckout = null です。
-これがないとページを移動したりするとカード登録ボタンが消えてしまいます。これは payjp-checkout のコンポネーネントがHTMLドキュメントの読み込みを起点として決済フォームを構築するためです。 そこでインスタンスが破棄される前に呼ばれる beforeDestroy() のライフサイクルで window.PayjpCheckout を一回空にして次のページ移動でもう一度コンポーネントを構築するようにしています。
+vue-payjp-checkout と本家の Checkout でパラメーター名が違いますが、下記の Checkout リファレンスと vue-payjp-chackout の index.ts の中身を見比べれば vue-payjp-checkout のパラメーターがどういう意味なのか確認できます。
+[PAY.JP Checkout 公式リファレンス](https://pay.jp/docs/checkout)
+[vue-payjp-checkout の index.ts](https://github.com/ngs/vue-payjp-checkout/blob/master/src/index.ts)
+
+また、ここでのポイントは beforeDestroy() で実行される window.PayjpCheckout = null です。これがないとページを移動したりするとカード登録ボタンが消えてしまいます。これは payjp-checkout のコンポネーネントがHTMLドキュメントの読み込みを起点として決済フォームを構築するためです。 そこでインスタンスが破棄される前に呼ばれる beforeDestroy() のライフサイクルで window.PayjpCheckout を一回空にして次のページ移動でもう一度コンポーネントを構築するようにしています。
 
 参考にしたサイトでは Timeout で待ったりしていましたので、対処の仕方は色々あります。
 [PAY.JPのチェックアウトのスクリプトをVue.jsのSPAで実装する](https://tackeyy.com/blog/posts/implement-payjp-checkout-with-vue-spa)
