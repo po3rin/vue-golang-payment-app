@@ -137,7 +137,7 @@ service宣言でサービスを定義し、定義したmessageを引数や返り
 ここまででGo言語のコードを生成する準備が整いました！早速下記を実行してみましょう
 
 ```bash
-$ protoc --go_out=plugins=grpc:. proto/task_list.proto
+$ protoc --go_out=plugins=grpc:. proto/pay.proto
 ```
 
 これでGo言語で書かれたソースコード proto/pay.pd.go が出来ています。中身を確認してみましょう
