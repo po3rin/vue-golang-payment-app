@@ -322,7 +322,7 @@ domain/token.go もつくります。
 ```go 
 package domain
 
-//Payment - PAY.JP payment parametor
+// Payment - PAY.JP payment parameter
 type Payment struct {
 	Token string
 }
@@ -430,7 +430,7 @@ func SelectItem(identifier int64) (item domain.Item, err error) {
 }
 ```
 
-Go言語の面白い点で、戻り値に名前をつけて定義した関数は return だけで終了しても構いません。これでもちゃんと item と err が帰ります。
+Go言語の面白い点で、戻り値に名前をつけて定義した関数は return だけで終了しても構いません。これでもちゃんと item と err が返ります。
 参考は下記
 [Goは関数の戻り値に名前を付けられる / deferの驚き](http://imagawa.hatenadiary.jp/entry/2016/12/08/190000)
 
@@ -557,7 +557,7 @@ func GetItem(c Context) {
 ```
 
 そしてエラー処理は一旦全て簡易化のため 500エラーで返してます。
-また、支払いを行う handler を書きます。ここではレクエストで渡された id を使って DB から商品情報を所得して、最初に作った gRPCサーバーの Charge に引数として cardToken と商品情報と渡して実行します。
+また、支払いを行う handler を書きます。ここではレクエストで渡された id を使って DB から商品情報を取得して、最初に作った gRPCサーバーの Charge に引数として cardToken と商品情報と渡して実行します。
 
 ```go
 package handler
@@ -584,7 +584,7 @@ func Charge(c Context) {
 		c.JSON(http.StatusInternalServerError, err)
 	}
 
-	// id から item情報所得
+	// id から item情報取得
 	res, err := db.SelectItem(int64(identifer))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
