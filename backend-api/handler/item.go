@@ -18,12 +18,12 @@ func GetLists(c Context) {
 
 // GetItem - get item by id
 func GetItem(c Context) {
-	identifer, err := strconv.Atoi(c.Param("id"))
+	identifier, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	res, err := db.SelectItem(int64(identifer))
+	res, err := db.SelectItem(int64(identifier))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
