@@ -1,5 +1,10 @@
 ![pay-cover.png](https://qiita-image-store.s3.amazonaws.com/0/186028/3d6c3897-c9e2-b119-14e0-6b26bbef9096.png)
 
+# vue-golang-payment-app
+[![Go Report Card](https://goreportcard.com/badge/github.com/po3rin/vue-golang-payment-app)](https://goreportcard.com/report/github.com/po3rin/vue-golang-payment-app)
+
+# Introduction
+
 これは Qiita にも掲載されています。
 https://qiita.com/po3rin/items/9638eab0a6a70faca86e
 
